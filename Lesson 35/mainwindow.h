@@ -13,6 +13,7 @@
 #include <QTimer>
 
 #include "qcustomplot.h"
+#include "graphic.h"
 
 #define FD 1000.0 //частота дискретизации
 
@@ -57,5 +58,9 @@ private:
     QVector<uint32_t> readData;
     QVector<double> processData;
     QVector<double> mins, maxs;
+
+    Graphic *graphicWindow;
+
+    void initializeGraphicWindow();
 };
 #endif // MAINWINDOW_H

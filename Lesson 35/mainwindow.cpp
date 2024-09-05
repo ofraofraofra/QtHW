@@ -5,6 +5,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , graphicWindow(nullptr)
 {
     ui->setupUi(this);
 
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete graphicWindow;
 }
 
 /****************************************************/
@@ -252,12 +254,13 @@ void MainWindow::on_pb_start_clicked()
 
 void MainWindow::on_graphReady(QVector<double> firstSecondData)
 {
-    static Graphic *graphicWindow = nullptr;
-
-    if (!graphicWindow) {
-        graphicWindow = new Graphic(this);
-        graphicWindow->show();
-    }
+    if (!graphicWindow || !graphicWindow->isVisible()) {
+            if (graphicWindow) {
+                delete graphicWindow;
+            }
+            graphicWindow = new Graphic(this);
+            graphicWindow->show();
+        }
 
     QCustomPlot *customPlot = graphicWindow->findChild<QCustomPlot*>("customPlot");
 
@@ -279,3 +282,13 @@ void MainWindow::on_graphReady(QVector<double> firstSecondData)
     customPlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
 }
 
+void MainWindow::initializeGraphicWindow()
+{
+    if (!graphicWindow || !graphicWindow->isVisible()) {
+        if (graphicWindow) {
+            delete graphicWindow;
+        }
+        graphicWindow = new Graphic(this);
+        graphicWindow->show();
+    }
+}
