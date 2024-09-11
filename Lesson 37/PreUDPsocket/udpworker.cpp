@@ -2,67 +2,64 @@
 
 UDPworker::UDPworker(QObject *parent) : QObject(parent){}
 
-
-/*!
- * @brief Метод инициализирует UDP сервер
- */
 void UDPworker::InitSocket()
 {
 
     serviceUdpSocket = new QUdpSocket(this);
-    /*
-     * Соединяем присваиваем адрес и порт серверу и соединяем функцию
-     * обраотчик принятых пакетов с сокетом
-     */
+    newUdpSocket = new QUdpSocket(this);
+
     serviceUdpSocket->bind(QHostAddress::LocalHost, BIND_PORT);
+    newUdpSocket->bind(QHostAddress::LocalHost, BIND_PORT_2);
 
     connect(serviceUdpSocket, &QUdpSocket::readyRead, this, &UDPworker::readPendingDatagrams);
-
+    connect(newUdpSocket, &QUdpSocket::readyRead, this, &UDPworker::readMyDatagrams);
 }
 
-/*!
- * @brief Метод осуществляет обработку принятой датаграммы
- */
 void UDPworker::ReadDatagram(QNetworkDatagram datagram)
+{
+
+    QByteArray data;
+    data = datagram.data();
+    QDataStream inStr(&data, QIODevice::ReadOnly);
+    QDateTime dateTime;
+    inStr >> dateTime;
+
+    emit sig_sendTimeToGUI(dateTime);
+}
+
+void UDPworker::ReadMyDatagram(QNetworkDatagram datagram)
 {
     QByteArray data;
     data = datagram.data();
-    QString format = QString::fromUtf8(data.left(4));
-    data.remove(0, 4);
+    QString adress = datagram.senderAddress().toString();
+    qint64 size = data.size();
 
-    QDataStream inStr(&data, QIODevice::ReadOnly);
-    if (format == "TIME") {
-        QDateTime dateTime;
-        inStr >> dateTime;
-        emit sig_sendTimeToGUI(dateTime);
-    }
-    if (format == "DATA") {
-        emit sig_sendDataToGUI(data);
-    }
+    emit sig_sendDataToGUI(adress,size);
 }
-/*!
- * @brief Метод осуществляет опередачу датаграммы
- */
-void UDPworker::SendDatagram(QByteArray data, QString format)
+
+void UDPworker::SendDatagram(QByteArray data)
 {
-    /*
-     *  Отправляем данные на localhost и задефайненный порт
-     */
-    data.prepend(format.toUtf8());
     serviceUdpSocket->writeDatagram(data, QHostAddress::LocalHost, BIND_PORT);
 }
 
-/*!
- * @brief Метод осуществляет чтение датаграм из сокета
- */
+void UDPworker::SendMyDatagram(QByteArray data)
+{
+    newUdpSocket->writeDatagram(data, QHostAddress::LocalHost, BIND_PORT_2);
+}
+
 void UDPworker::readPendingDatagrams( void )
 {
-    /*
-     *  Производим чтение принятых датаграмм
-     */
     while(serviceUdpSocket->hasPendingDatagrams()){
             QNetworkDatagram datagram = serviceUdpSocket->receiveDatagram();
             ReadDatagram(datagram);
     }
 
+}
+
+void UDPworker::readMyDatagrams(void)
+{
+    while(newUdpSocket->hasPendingDatagrams()){
+        QNetworkDatagram datagram = newUdpSocket->receiveDatagram();
+        ReadMyDatagram(datagram);
+    }
 }

@@ -22,13 +22,10 @@ public:
 private slots:
     void on_pb_start_clicked();
     void DisplayTime(QDateTime data);
-    void DisplayData(QByteArray data);
     void on_pb_stop_clicked();
 
-    void on_pb_sendData_clicked();
-
-signals:
-    void sig_sendData();
+    void DatagramInfo(QString adress, long long size);
+    void on_pb_send_clicked();
 
 private:
     Ui::MainWindow *ui;
