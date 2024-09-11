@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     udpWorker->InitSocket();
 
     connect(udpWorker, &UDPworker::sig_sendTimeToGUI, this, &MainWindow::DisplayTime);
-    connect(udpWorker, &UDPworker::sig_sendDataToGUI, this, &MainWindow::DatagramInfo);
+    connect(udpWorker, &UDPworker::sig_sendDataToGUI, this, &MainWindow::DisplayData);
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [&]{
@@ -69,7 +69,7 @@ void MainWindow::on_pb_stop_clicked()
     ui->pb_stop->setEnabled(false);
 }
 
-void MainWindow::DatagramInfo(QString adress, long long size)
+void MainWindow::DisplayData(QString adress, long long size)
 {
     ui->te_result->append("Принято сообщение от: " + adress + ", размером сообщения(байт) " + QString::number(size));
 }

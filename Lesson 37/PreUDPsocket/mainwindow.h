@@ -24,7 +24,7 @@ private slots:
     void DisplayTime(QDateTime data);
     void on_pb_stop_clicked();
 
-    void DatagramInfo(QString adress, long long size);
+    void DisplayData(QString adress, long long size);
     void on_pb_send_clicked();
 
 private:
